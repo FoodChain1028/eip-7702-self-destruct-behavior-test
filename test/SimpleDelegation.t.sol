@@ -35,8 +35,7 @@ contract SignDelegationTest is Test {
         console.log("  Bob:", bobInitialBalance);
         
         // Alice signs a delegation allowing `delegation` to execute transactions on her behalf
-        Vm.SignedDelegation memory signedDelegation = vm.signAndAttachDelegation(address(delegation), ALICE_PK);
-        // vm.attachDelegation(signedDelegation);
+        vm.signAndAttachDelegation(address(delegation), ALICE_PK);
         
         // Verify that Alice's account now temporarily behaves as a smart contract
         bytes memory code = address(ALICE_ADDRESS).code;
