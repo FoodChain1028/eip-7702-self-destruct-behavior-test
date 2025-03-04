@@ -1,66 +1,120 @@
-## Foundry
+## Run foundry test
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Run forge test:
 
-Foundry consists of:
-
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```bash
+forge build
 ```
 
-### Test
+and
 
-```shell
-$ forge test
+```bash
+forge test -vv
 ```
 
-### Format
+The result:
 
-```shell
-$ forge fmt
+```bash
+Initial balances:
+    Alice: 1000000000000000000
+    Bob: 0
+  
+Code lengths before destroy:
+    Alice's code length: 23
+  
+Final balances after destroy (self destruct):
+    Alice: 0
+    Bob: 1000000000000000000
+  
+Code lengths after destroy:
+    Alice's code length: 23
+  
+Alice's code bytes:
+  0xef01005615deb798bb3e4dfa0139dfa1b3d433cc23b72f
 ```
 
-### Gas Snapshots
+## Run TypeScript Test (using `viem`)
 
-```shell
-$ forge snapshot
+Before running all these, make sure you have run `forge build`.
+
+Run the test where EIP-7702 and destroy are in the same tx.
+
+```bash
+1. Install dependencies:
+    yarn install
+2. Start Anvil with Odyssey flag:
+    anvil --odyssey
+3. Run the test script:
+    yarn test-same-tx
 ```
 
-### Anvil
+The result would be something like this:
 
-```shell
-$ anvil
+```bash
+yarn test-same-tx                                                                                                                                                self_destruct_eip_7702 -> main ? !
+yarn run v1.22.22
+warning package.json: No license field
+$ tsx script/SelfDestructInSameTx.ts
+=== Testing EIP-7702 Self-Destruct Behavior (Sending in the same Tx) ===
+
+Checking if Anvil is running...
+✅ Connected to Anvil
+✅ Alice's code BEFORE DESTROY: 0x
+✅ Alice's balance BEFORE DESTROY: 1
+✅ Bob's balance BEFORE DESTROY: 1
+
+Deploying SimpleDelegation contract...
+✅ SimpleDelegation deployed at address: 0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+
+Signing authorization message for Alice...
+
+1. Bob send a transaction to Alice.destroy() with a EIP-7702 tx (EIP-7702 tx & selfdestroy in the same tx)...
+
+Observation of code and balance of Alice and Bob...
+✅ Alice's code AFTER DESTROY: 0xef01009fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+✅ Alice's balance AFTER DESTROY: 0
+✅ Bob's balance AFTER DESTROY: 1.999931621339593216
+✨  Done in 5.14s.
 ```
 
-### Deploy
+Run the test where EIP-7702 and destroy are in the different txs.
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+```bash
+1. Install dependencies:
+    yarn install
+2. Start Anvil with Odyssey flag:
+    anvil --odyssey
+3. Run the test script:
+    yarn test-diff-tx
 ```
 
-### Cast
+The result would be something like this:
 
-```shell
-$ cast <subcommand>
-```
+```bash
+$ yarn test-diff-tx
+yarn run v1.22.22
+warning package.json: No license field
+$ tsx script/SelfDestructInDiffTx.ts
+=== Testing EIP-7702 Self-Destruct Behavior (In Different Txs) ===
 
-### Help
+Checking if Anvil is running...
+✅ Connected to Anvil
+✅ Alice's code BEFORE DESTROY: 0x
+✅ Alice's balance BEFORE DESTROY: 1
+✅ Bob's balance BEFORE DESTROY: 1
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+Deploying SimpleDelegation contract...
+✅ SimpleDelegation deployed at address: 0x5fc8d32690cc91d4c39d9d3abcbd16989f875707
+
+Signing authorization message for Alice...
+
+1. Bob send a EIP-7702 transaction to attach code to Alice...
+
+2. Bob send a transaction to Alice.destroy() (a normal tx)...
+
+Observation of code and balance of Alice and Bob...
+✅ Alice's code AFTER DESTROY: 0xef01005fc8d32690cc91d4c39d9d3abcbd16989f875707
+✅ Alice's balance AFTER DESTROY: 0
+✅ Bob's balance AFTER DESTROY: 1.99991353275149296
+✨  Done in 4.83s.
 ```
